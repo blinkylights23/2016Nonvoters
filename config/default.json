@@ -1,0 +1,23 @@
+{
+  "server": {
+    "options": {
+      "variables": {
+        "dist": false
+      }
+    }
+  },
+  "staging": {
+    "options": {
+      "variables": {
+        "dist": false
+      }
+    }
+  },
+  "production": {
+    "options": {
+      "variables": {
+        "dist": true
+      }
+    }
+  }
+}
