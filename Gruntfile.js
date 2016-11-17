@@ -40,7 +40,7 @@ module.exports = function (grunt) {
 
     watch: {
       options: {
-        spawn: false
+        spawn: true
       },
       stylus: {
         files: ['<%= destinations.app %>/styl/**/*', '<%= destinations.app %>/css/**/*'],
