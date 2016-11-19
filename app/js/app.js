@@ -75,11 +75,83 @@ function stateMouseout(d, i) {
 }
 
 function stateClick(d, i) {
-  console.log('click', d, i);
   var dataDiv = d3.select('div#voterData')
     .style('display', 'block')
     .style('width', mapWidth + 'px')
     .html(voterDataTemplate(d.properties.data));
+
+  var arc = d3.arc()
+    .outerRadius(100)
+    .innerRadius(0);
+  var labelArc = d3.arc()
+    .outerRadius(60)
+    .innerRadius(60);
+  var pie = d3.pie()
+    .sort(null)
+    .value(function(pd) { return (pd.pct); });
+
+  var svg = d3.select('svg#pieChart')
+    .style('width', 250)
+    .style('height', 250)
+    .append('g')
+    .attr('transform', 'translate(125, 125)');
+
+  var g = svg.selectAll('.arc')
+    .data(pie(pcts(d.properties.data)))
+    .enter()
+    .append('g')
+    .attr('class', 'arc');
+
+  g.append('path')
+    .attr('d', arc)
+    .style('fill', d => { return d.data.color })
+
+  g.append('text')
+    .attr('transform', d => 'translate(' + labelArc.centroid(d) + ')')
+    .attr('dy', '.2em')
+    .attr('fill', 'white')
+    .style('text-anchor', 'middle')
+    .text(d => d.data.pct + '%');
+
+  function pcts(data) {
+    var clinton = parseInt(data.clinton),
+        trump = parseInt(data.trump),
+        others = parseInt(data.others),
+        vep = parseInt(data.vep),
+        votesCast = (clinton + trump + others),
+        noVote = vep - votesCast,
+        noVotePct = (100 * noVote / vep).toFixed(2),
+        clintonPct = (100 * clinton / vep).toFixed(2),
+        trumpPct = (100 * trump / vep).toFixed(2),
+        othersPct = (100 * others / vep).toFixed(2);
+
+    return [
+      {
+        color: '#999',
+        title: 'No vote',
+        total: noVote,
+        pct: noVotePct
+      },
+      {
+        color: '#009',
+        title: 'Clinton',
+        total: clinton,
+        pct: clintonPct
+      },
+      {
+        color: '#900',
+        title: 'Trump',
+        total: trump,
+        pct: trumpPct
+      },
+      {
+        color: '#090',
+        title: 'Others',
+        total: others,
+        pct: othersPct
+      },
+    ];
+  }
 }
 
 
