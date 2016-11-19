@@ -3,6 +3,7 @@
 import * as d3Obj from 'd3';
 import * as d3_selection from 'd3-selection';
 import 'd3-selection-multi';
+import voterDataTemplate from './voterData';
 var d3 = Object.assign({}, d3Obj);
 
 var mapWidth = 800,
@@ -36,7 +37,7 @@ d3.json('/data/us-states.json', function(json) {
     var mapSvg = d3.select('#visualization svg#map')
       .attr('width', mapWidth)
       .attr('height', mapHeight)
-      .style('border', '1px solid #aaa');
+      .style('border', '1px solid #eee');
     var g = mapSvg.append('g');
 
     g.append('g').attr('class', 'statesMap')
@@ -60,7 +61,6 @@ d3.json('/data/us-states.json', function(json) {
 
 
 function stateMouseover(d, i) {
-  console.log(d3Obj.event.pageX, d3Obj.event.pageY);
   tooltipDiv.transition()
     .duration(200)
     .style('opacity', '1.0');
@@ -70,7 +70,6 @@ function stateMouseover(d, i) {
 }
 
 function stateMouseout(d, i) {
-  // console.log('mouseout', d, i);
   tooltipDiv.transition()
     .duration(500)
     .style('opacity', 0);
@@ -78,6 +77,10 @@ function stateMouseout(d, i) {
 
 function stateClick(d, i) {
   console.log('click', d, i);
+  var dataDiv = d3.select('div#voterData')
+    .style('display', 'block')
+    .style('width', mapWidth + 'px')
+    .html(voterDataTemplate(d.properties.data));
 }
 
 

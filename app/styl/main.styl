@@ -19,3 +19,51 @@ div.tooltip
   svg#map
     path:hover
     	fill-opacity: .7
+
+
+#voterData
+  display: none
+
+  h1
+    font-family: sans-serif
+
+    span
+      font-weight: normal
+      font-size: 16px
+
+  dl
+    dt
+      font-weight: bold
+    dd
+      font-style: italic
+      margin-bottom: 1em
+
+  table
+    width: 100%
+    color: white
+
+    tr
+      td
+        padding: 10px
+
+      td:first-child
+        font-weight: bold
+        font-family: sans-serif
+      td:nth-child(2)
+        text-align: right
+        font-style: italic
+      td:nth-child(3)
+        text-align: right
+        font-style: italic
+
+    tr.noVoteRow
+      background: #999
+
+    tr.clintonRow
+      background: #009
+
+    tr.trumpRow
+      background: #900
+
+    tr.othersRow
+      background: #090
