@@ -37,7 +37,6 @@ d3.json('/data/us-states.json', function(json) {
     var mapSvg = d3.select('#visualization svg#map')
       .attr('width', mapWidth)
       .attr('height', mapHeight)
-      .style('border', '1px solid #eee');
     var g = mapSvg.append('g');
 
     g.append('g').attr('class', 'statesMap')
