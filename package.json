@@ -16,6 +16,7 @@
     "axis": "^0.6.1",
     "babel-preset-es2015-rollup": "^1.2.0",
     "d3": "^4.3.0",
+    "d3-geo": "^1.4.0",
     "d3-selection-multi": "^1.0.0",
     "grunt": "^1.0.1",
     "grunt-browser-sync": "^2.2.0",
