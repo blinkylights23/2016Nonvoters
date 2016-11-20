@@ -60,6 +60,7 @@ d3.json('/data/us-states.json', function(json) {
 
     var maps = {
       doMap: function(g, fn) {
+        g.selectAll('g').remove();
         g.append('g').attr('class', 'statesMap')
           .selectAll('path')
           .data(json.features.filter(f => f.properties.data))
@@ -100,7 +101,7 @@ d3.json('/data/us-states.json', function(json) {
       }
     };
 
-    maps.pluralityMap(g);
+    maps.electoralMap(g);
     d3.select('ul#mapChoices')
       .append('li')
       .append('a')
