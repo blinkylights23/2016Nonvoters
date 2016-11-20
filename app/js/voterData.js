@@ -14,43 +14,31 @@ function dgaf() {
 
 
 export default function(data) {
-  var clinton = parseInt(data.clinton),
-      trump = parseInt(data.trump),
-      others = parseInt(data.others),
-      vep = parseInt(data.vep),
-      votesCast = (clinton + trump + others),
-      noVote = vep - votesCast,
-      turnoutPct = ((clinton + trump + others) / parseFloat(data.vep) * 100).toFixed(2),
-      noVotePct = (100 * noVote / vep).toFixed(2),
-      clintonPct = (100 * clinton / vep).toFixed(2),
-      trumpPct = (100 * trump / vep).toFixed(2),
-      othersPct = (100 * others / vep).toFixed(2);
-
   var resultTable = [
     {
       rowClass: 'noVoteRow',
       title: dgaf(),
-      total: noVote,
-      pct: noVotePct
+      total: data.noVote,
+      pct: data.noVotePct
     },
     {
       rowClass: 'clintonRow',
       title: 'Clinton',
-      total: clinton,
-      pct: clintonPct
+      total: data.clinton,
+      pct: data.clintonPct
     },
     {
       rowClass: 'trumpRow',
       title: 'Trump',
-      total: trump,
-      pct: trumpPct
+      total: data.trump,
+      pct: data.trumpPct
     },
     {
       rowClass: 'othersRow',
       title: 'Others',
-      total: others,
-      pct: othersPct
-    },
+      total: data.others,
+      pct: data.othersPct
+    }
   ];
 
   resultTable.sort((a, b) => {
@@ -58,7 +46,12 @@ export default function(data) {
   });
 
   return `
-<h1>${data.state} <span>[${data.ecv} electoral votes]</span></h1>
+<h1>${data.state}</h1>
+<h2>
+  <span>${data.ecv}</span> electoral votes<br/>
+  <span>${data.vep.toLocaleString()}</span> eligible voters<br/>
+  <span>${data.turnoutPct}</span>% turnout
+</h2>
 
 <table>
   <tr class="${resultTable[0].rowClass}">

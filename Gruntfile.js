@@ -151,6 +151,27 @@ module.exports = function (grunt) {
           '<%= destinations.build %>/js/bundle.js': ['<%= destinations.app %>/js/app.js'],
         }
       }
+    },
+
+    aws_s3: {
+      options: {
+        // accessKeyId: '',
+        // secretAccessKey: '',
+        awsProfile: 'paulsmith',
+        region: 'us-east-1',
+        uploadConcurrency: 5,
+        downloadConcurrency: 5
+      },
+      production: {
+        options: {
+          bucket: 'novotes.paulsmith.io',
+          differential: true,
+          gzipRename: 'ext'
+        },
+        files: [
+          {expand: true, cwd: 'build/', src: ['**'], dest: '/', params: {CacheControl: '300'}}
+        ]
+      },
     }
 
   });
@@ -207,5 +228,12 @@ module.exports = function (grunt) {
   grunt.registerTask('default', [
     'server'
   ]);
+
+  grunt.registerTask('deploy', function(target) {
+    grunt.task.run([
+      'build',
+      'aws_s3:' + target
+    ]);
+  })
 
 };

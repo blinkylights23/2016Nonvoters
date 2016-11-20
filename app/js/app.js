@@ -25,35 +25,100 @@ var voterData = d3.select('div#voterData');
 
 d3.json('/data/us-states.json', function(json) {
   d3.csv('/data/2016Results.csv', function(err, data) {
-
     data.forEach(d => {
       json.features.forEach(j => {
         if (d.state == j.properties.name) {
+          d.clinton = parseInt(d.clinton);
+          d.trump = parseInt(d.trump);
+          d.others = parseInt(d.others);
+          d.vep = parseInt(d.vep);
+          d.votesCast = (d.clinton + d.trump + d.others);
+          d.noVote = d.vep - d.votesCast;
+          d.turnoutPct = (100 * d.votesCast / d.vep).toFixed(2);
+          d.noVotePct = (100 * d.noVote / d.vep).toFixed(2);
+          d.clintonPct = (100 * d.clinton / d.vep).toFixed(2);
+          d.trumpPct = (100 * d.trump / d.vep).toFixed(2);
+          d.othersPct = (100 * d.others / d.vep).toFixed(2);
           j.properties.data = d;
         }
       });
     });
+
+    var turnoutScale = d3.scaleLinear()
+      .domain(
+        [
+          d3.min(json.features.filter(j => j.properties.data).map(j => parseFloat(j.properties.data.noVotePct))),
+          d3.max(json.features.filter(j => j.properties.data).map(j => parseFloat(j.properties.data.noVotePct)))
+        ]
+      )
+      .range(['#333', '#eee']);
 
     var mapSvg = d3.select('#visualization svg#map')
       .attr('width', mapWidth)
       .attr('height', mapHeight)
     var g = mapSvg.append('g');
 
-    g.append('g').attr('class', 'statesMap')
-      .selectAll('path')
-	    .data(json.features.filter(f => f.properties.data))
-	    .enter()
-	    .append('path')
-	    .attr('d', path)
-	    .style('stroke', '#fff')
-	    .style('stroke-width', '1')
-	    .style('fill', (d, i) => {
-        return parseInt(d.properties.data.clinton) <= parseInt(d.properties.data.trump) ? '#900' : '#009';
-      })
-      .on('mouseover', stateMouseover)
-      .on('mouseout', stateMouseout)
-      .on('click', stateClick);
+    var maps = {
+      doMap: function(g, fn) {
+        g.append('g').attr('class', 'statesMap')
+          .selectAll('path')
+          .data(json.features.filter(f => f.properties.data))
+          .enter()
+          .append('path')
+          .attr('d', path)
+          .style('stroke', '#fff')
+          .style('stroke-width', '1')
+          .style('fill', fn)
+          .on('mouseover', stateMouseover)
+          .on('mouseout', stateMouseout)
+          .on('click', stateClick);
+      },
 
+      electoralMap: function(g) {
+        this.doMap(g, d => {
+          return parseInt(d.properties.data.clinton) <= parseInt(d.properties.data.trump) ? '#900' : '#009';
+        });
+      },
+      pluralityMap: function(g) {
+        this.doMap(g, d => {
+          let pluralityData = d.properties.data;
+          let pluralities = [
+            { title: 'clinton', total: pluralityData.clinton, color: '#009' },
+            { title: 'trump', total: pluralityData.trump, color: '#900' },
+            { title: 'noVote', total: pluralityData.noVote, color: '#999' },
+          ];
+          pluralities.sort((a, b) => {
+            return b.total - a.total;
+          });
+          return pluralities[0].color;
+        });
+      },
+      turnoutMap: function(g) {
+        this.doMap(g, d => {
+          return turnoutScale(d.properties.data.noVotePct)
+        });
+      }
+    };
+
+    maps.pluralityMap(g);
+    d3.select('ul#mapChoices')
+      .append('li')
+      .append('a')
+      .attr('href', '#')
+      .text('Electoral college')
+      .on('click', d => { maps.electoralMap(g) })
+    d3.select('ul#mapChoices')
+      .append('li')
+      .append('a')
+      .attr('href', '#')
+      .text('Turnout')
+      .on('click', d => { maps.turnoutMap(g) })
+    d3.select('ul#mapChoices')
+      .append('li')
+      .append('a')
+      .attr('href', '#')
+      .text('Larget plurality (including non-voters)')
+      .on('click', d => { maps.pluralityMap(g) })
   });
 });
 
@@ -63,7 +128,7 @@ function stateMouseover(d, i) {
   tooltipDiv.transition()
     .duration(200)
     .style('opacity', '1.0');
-  tooltipDiv.html(`${d.properties.data.abbr} [${d.properties.data.ecv}]`)
+  tooltipDiv.html(`${d.properties.data.abbr} [${d.properties.data.ecv}, ${d.properties.data.turnoutPct}%]`)
     .style('left', d3Obj.event.pageX + 'px')
     .style('top', d3Obj.event.pageY + 'px');
 }
@@ -114,41 +179,30 @@ function stateClick(d, i) {
     .text(d => d.data.pct + '%');
 
   function pcts(data) {
-    var clinton = parseInt(data.clinton),
-        trump = parseInt(data.trump),
-        others = parseInt(data.others),
-        vep = parseInt(data.vep),
-        votesCast = (clinton + trump + others),
-        noVote = vep - votesCast,
-        noVotePct = (100 * noVote / vep).toFixed(2),
-        clintonPct = (100 * clinton / vep).toFixed(2),
-        trumpPct = (100 * trump / vep).toFixed(2),
-        othersPct = (100 * others / vep).toFixed(2);
-
     return [
       {
         color: '#999',
         title: 'No vote',
-        total: noVote,
-        pct: noVotePct
+        total: data.noVote,
+        pct: data.noVotePct
       },
       {
         color: '#009',
         title: 'Clinton',
-        total: clinton,
-        pct: clintonPct
+        total: data.clinton,
+        pct: data.clintonPct
       },
       {
         color: '#900',
         title: 'Trump',
-        total: trump,
-        pct: trumpPct
+        total: data.trump,
+        pct: data.trumpPct
       },
       {
         color: '#090',
         title: 'Others',
-        total: others,
-        pct: othersPct
+        total: data.others,
+        pct: data.othersPct
       },
     ];
   }
